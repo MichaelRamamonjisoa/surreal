@@ -1,0 +1,2 @@
+wood-plain-04-albedo.png
+wood-plain-01-roughness.png

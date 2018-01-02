@@ -4,16 +4,273 @@ import random
 import math
 import bpy
 import numpy as np
-from os import getenv
-from os import remove
+#from os import getenv
+#from os import remove
 from os.path import join, dirname, realpath, exists
 from mathutils import Matrix, Vector, Quaternion, Euler
-from glob import glob
+#from glob import glob
 from random import choice
 from pickle import load
 from bpy_extras.object_utils import world_to_camera_view as world2cam
 
 sys.path.insert(0, ".")
+
+def select_rand_file_from_txtlist(txtFilename):
+    with open(txtFilename, 'r') as f:
+        list_fn = [line.split('\n')[0] for line in f]
+        
+    chosen_filename = choice(list_fn)
+    return(chosen_filename)
+
+def build_background(room='bedroom', walls=['N','W'], width=25, length=15, height=2.4):
+    
+    #Build walls and floor
+    bpy.ops.mesh.archimesh_room()
+    height_2 = height + 5
+    bpy.data.objects["Room"].RoomGenerator[0].wall_num = 3    
+    bpy.data.objects["Room"].RoomGenerator[0].wall_width = 0.09    
+    bpy.data.objects["Room"].RoomGenerator[0].walls[0].w = width
+    bpy.data.objects["Room"].RoomGenerator[0].walls[1].w = length
+    bpy.data.objects["Room"].RoomGenerator[0].walls[2].w = -width         
+    bpy.data.objects["Room"].RoomGenerator[0].merge = True
+    bpy.data.objects["Room"].RoomGenerator[0].room_height = height_2
+#    bpy.data.objects["Room"].RoomGenerator[0].floor = True 
+#    bpy.data.objects["Room"].RoomGenerator[0].ceiling = True 
+    bpy.data.objects["Room"].location = (-width/2,-length/2,0)
+    
+    
+    the_folder = join(os.path.expanduser('~'), 'Documents', 'MVA', 'datageneration')
+    tex_folder = join(the_folder,'Texture_Material','dtd')
+                                                  
+    if room=='bedroom':        
+        # load bed
+#        load_IKEA_dtd('bed',(2,2,0.0),1,0)
+        load_IKEA_dtd('bed',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        # load bookcase
+#        load_IKEA_dtd('bookcase',(2.0,3.0,0.0),1,0)
+        load_IKEA_dtd('bookcase',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        # load desk
+#        load_IKEA_dtd('desk',(2.0,-2.0,0.0),1,0)
+        load_IKEA_dtd('desk',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        # load chair 
+#        load_IKEA_dtd('chair',(0.0,2.0,0.0),0.7,np.random.uniform(-180,179))
+        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
+        # load wardrobe
+#        load_IKEA_dtd('wardrobe',(4.0,2.0,0.0),1,0)
+        load_IKEA_dtd('wardrobe',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        
+    if room=='living':
+        # load sofa
+#        load_IKEA_dtd('sofa',(2,2,0.0),1,0)
+        load_IKEA_dtd('sofa',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        # load bookcase
+#        load_IKEA_dtd('bookcase',(2.0,3.0,0.0),1,0)
+        load_IKEA_dtd('bookcase',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        # load desk
+#        load_IKEA_dtd('desk',(2.0,-2.0,0.0),1,0)
+        load_IKEA_dtd('desk',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        # load chair 
+        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
+        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
+        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
+        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
+        # load table
+        load_IKEA_dtd('table',(4.0,2.0,0.0),1.6,0)
+        
+    #group background objects together
+    if not 'bg_group' in bpy.data.groups:
+        objects = bpy.context.scene.objects
+        list_objects = [ob for ob in objects if ob.layers[0] and ob.name!='Camera']
+        group = bpy.data.groups.new("bg_group")
+        for ob in list_objects:
+            group.objects.link(ob)
+            
+    # Random light position and intensity
+    #remove 'Lamp' object
+    objs = bpy.data.objects
+    objs.remove(objs["Lamp"], True)    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=8,ring_count=8)
+    light_sphere = bpy.data.objects["Sphere"]
+    mat_light = bpy.data.materials.new(name="LightMaterial")
+    bpy.ops.object.material_slot_add()
+    light_sphere.material_slots[0].material = mat_light
+    
+    #make node tree
+    bpy.data.materials[mat_light.name].use_nodes = True          
+    light_tree = mat_light.node_tree
+    
+    for n in light_tree.nodes:
+        light_tree.nodes.remove(n)    
+        
+    emission = light_tree.nodes.new("ShaderNodeEmission")
+    light_out = light_tree.nodes.new("ShaderNodeOutputMaterial")
+    
+    light_tree.links.new(emission.outputs[0],light_out.inputs[0])    
+    
+    light_pos = ((np.random.rand(1)-0.5)*width,(np.random.rand(1)-0.5)*length,(np.random.rand(1)-0.5)*height)
+#    light_angle = (np.random.rand(1)*360-180,np.random.rand(1)*360-180,np.random.rand(1)*360-180)
+    light_size = np.random.rand(1)
+    light_sphere.location = light_pos
+#    light_plane.rotation_euler = light_angle
+    light_sphere.scale = light_size*(1,1,1)
+    light_intensity = np.random.rand(1)*100
+    emission.inputs[1].default_value = light_intensity   
+
+    #make light plane invisible
+    light_sphere.cycles_visibility.camera = False
+    light_sphere.cycles_visibility.glossy = False
+    light_sphere.cycles_visibility.transmission = False
+    light_sphere.cycles_visibility.scatter = False
+    light_sphere.cycles_visibility.shadow = False                 
+            
+    rot_x_neg90 = Matrix.Rotation(math.pi/2.0, 4, 'X')
+    
+    bpy.ops.object.select_all(action='DESELECT') 
+    
+    gen = (obj for obj in bpy.data.objects if obj.name!='Camera')
+    for obj in gen:
+        obj.matrix_world = rot_x_neg90 * obj.matrix_world            
+    
+    # Add materials to wall and floor
+    # Walls
+    for o in bpy.data.objects:
+        o.select = False        
+    obj = bpy.data.objects["Room"]
+    obj.select = True
+    bpy.context.scene.objects.active = obj            
+    bpy.ops.object.material_slot_remove()
+    mat_wall = bpy.data.materials.new(name="WallMaterial")
+    bpy.ops.object.material_slot_add()
+    
+    mat_type = choice(['banded','lined', 'paisley', 'polka-dotted', 'striped', 'zigzagged'])
+#    log_message('WallMaterialType: %s' % mat_type)
+    wall_file = select_rand_file_from_txtlist(join(tex_folder,'for_surreal',mat_type+'.txt'))  
+#    log_message('WallMaterial: %s' % wall_file)      
+    addImg2Mat(join(tex_folder,'images',mat_type,wall_file),mat_wall.name,(0.2,0.2,0.2))          
+    
+    for o in bpy.data.objects:
+        o.select = False       
+    bpy.data.objects["Room"].select = True
+    bpy.data.objects["Room"].RoomGenerator[0].floor = True    
+    bpy.data.objects["Room"].select = False
+    obj = bpy.data.objects["Floor"]
+    obj.select = True
+    bpy.context.scene.objects.active = obj            
+    bpy.ops.object.material_slot_remove()
+    mat_floor = bpy.data.materials.new(name="FloorMaterial")
+    bpy.ops.object.material_slot_add()   
+    
+    floor_txtfile = join(the_folder,'Texture_Material', "floor.txt")    
+    select_tex_floor = select_rand_file_from_txtlist(floor_txtfile)
+    if select_tex_floor == 'marbled':
+        floor_file = select_rand_file_from_txtlist(join(tex_folder,'for_surreal','marbled.txt')) 
+        addImg2Mat(join(tex_folder,'images','marbled',floor_file),mat_floor.name,(0.25,0.25,0.25)) 
+    else:
+        floorImgPath = join(the_folder,'Texture_Material',select_tex_floor)
+        addImg2Mat(floorImgPath,mat_floor.name,imgScale = (0.25,0.25,0.25))
+        
+    bpy.data.objects["Room"].material_slots[0].material = mat_wall             
+    bpy.data.objects["Floor"].material_slots[0].material = mat_floor
+#    ## Uncomment to add ceiling
+#    bpy.data.objects["Room"].RoomGenerator[0].ceiling = False 
+#    bpy.data.objects["Room"].RoomGenerator[0].ceiling = True
+#    
+#    for o in bpy.data.objects:
+#        o.select = False        
+#    obj = bpy.data.objects["Ceiling"]
+#    obj.select = True
+#    bpy.context.scene.objects.active = obj            
+#    bpy.ops.object.material_slot_remove()
+#    mat_ceil = bpy.data.materials.new(name="CeilMaterial")
+#    bpy.ops.object.material_slot_add()   
+#    
+#    ceil_txtfile = join(the_folder,'Texture_Material', "floor.txt")    
+#    select_tex_ceil = select_rand_file_from_txtlist(ceil_txtfile)
+#    if select_tex_ceil == 'marbled':
+#        ceil_file = select_rand_file_from_txtlist(join(tex_folder,'for_surreal','marbled.txt')) 
+#        addImg2Mat(join(tex_folder,'images','marbled',ceil_file),mat_ceil.name,(0.25,0.25,0.25)) 
+#    else:
+#        floorImgPath = join(the_folder,'Texture_Material',select_tex_floor)
+#        addImg2Mat(floorImgPath,mat_ceil.name,imgScale = (0.25,0.25,0.25))
+#             
+#    obj.material_slots[0].material = mat_ceil
+    
+    
+       
+    return light_pos, light_size, light_intensity
+
+        
+def sum_coords(tuple1,tuple2):
+    n = len(tuple1)
+    a = [0]*n
+    for i in range(0,n):
+        a[i] = tuple1[i] + tuple2[i]
+    return(tuple(a))
+    
+def load_IKEA_dtd(item_category='bed', item_location=(0,0,0), item_scale = 1, item_z_angle = 0):
+    
+    #build collection list
+    list_obj = []
+    the_folder = join(os.path.expanduser('~'), 'Documents', 'MVA', 'datageneration')
+    tex_folder = join(the_folder,'Texture_Material','dtd')
+    
+    IKEA_folder = join(the_folder,'3dobj_data', 'IKEA')
+    with open(join(IKEA_folder, "all_obj.txt"), "r") as f:
+        list_obj = ['IKEA_'+line.split('IKEA_')[1].split('\x1b')[0] for line in f if len(line.split('IKEA_'+item_category))==2]
+         
+    select_obj = choice(list_obj)
+    file_loc = join(IKEA_folder, select_obj)
+    imported_object = bpy.ops.import_scene.obj(filepath=file_loc,use_split_objects=False,use_split_groups=False,axis_forward='Z',axis_up='Y')
+    obj = bpy.context.selected_objects[0]
+    
+    obj_name = obj.name
+    bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='BOUNDS')    
+    (x,y,z) = (item_scale/(min([(obj.dimensions[0]+obj.dimensions[1]+obj.dimensions[2])/3,max(obj.dimensions)])))*obj.dimensions
+    bpy.data.objects[obj_name].dimensions = (x,y,z)
+    bpy.data.objects[obj_name].location = sum_coords(item_location,(0,0,y/2))
+    
+    (tx,ty,tz) = bpy.data.objects[obj_name].rotation_euler 
+    bpy.data.objects[obj_name].rotation_euler = sum_coords((tx,ty,tz),(0,0,item_z_angle))
+    
+    #add random materials to IKEA objects from the Describable Texture Dataset
+    
+    for i,slot in enumerate(bpy.data.objects[obj_name].material_slots):
+        mat = bpy.data.objects[obj_name].material_slots[i].material
+        mat_type = select_rand_file_from_txtlist(join(tex_folder,'dtd_types.txt'))
+        mat_file = select_rand_file_from_txtlist(join(tex_folder,'for_surreal',mat_type+'.txt'))        
+        addImg2Mat(join(tex_folder,'images',mat_type,mat_file),mat.name,(1,1,1))                
+        
+    return(obj_name)
+
+def addImg2Mat(imgFullPath,matName,imgScale = (0.5,0.5,0.5)):
+    
+    scene = bpy.data.scenes['Scene']
+    scene.render.engine = 'CYCLES'
+    bpy.data.materials[matName].use_nodes = True
+    img = bpy.data.images.load(imgFullPath)
+    
+    mat_tree = bpy.data.materials[matName].node_tree
+    
+    # clear default nodes
+    for n in mat_tree.nodes:
+        mat_tree.nodes.remove(n)
+
+    texImg = mat_tree.nodes.new("ShaderNodeTexImage")
+    texImg.image = img
+    
+    bsdf = mat_tree.nodes.new("ShaderNodeBsdfDiffuse")
+    mat_out = mat_tree.nodes.new("ShaderNodeOutputMaterial")
+    
+    uv = mat_tree.nodes.new('ShaderNodeTexCoord')
+    mapp = mat_tree.nodes.new('ShaderNodeMapping')    
+    mapp.vector_type = 'TEXTURE'
+    mapp.scale = imgScale
+       
+    mat_tree.links.new(uv.outputs[2],mapp.inputs[0])
+    mat_tree.links.new(mapp.outputs[0],texImg.inputs[0])
+    mat_tree.links.new(texImg.outputs[0],bsdf.inputs[0])    
+    mat_tree.links.new(bsdf.outputs[0], mat_out.inputs[0])
 
 def mkdir_safe(directory):
     try:
@@ -66,7 +323,7 @@ def create_segmentation(ob, params):
     return(materials)
 
 # create the different passes that we render
-def create_composite_nodes(tree, params, img=None, idx=0):
+def create_composite_nodes(tree, params, idx=0):
     res_paths = {k:join(params['tmp_path'], '%05d_%s'%(idx, k)) for k in params['output_types'] if params['output_types'][k]}
     
     # clear default nodes
@@ -76,13 +333,10 @@ def create_composite_nodes(tree, params, img=None, idx=0):
     # create node for foreground image
     layers = tree.nodes.new('CompositorNodeRLayers')
     layers.location = -300, 400
-
+    
+    ## TODO : change this for an automatic generation of background scene
     # create node for background image
-    bg_im = tree.nodes.new('CompositorNodeImage')
-    bg_im.location = -300, 30
-    if img is not None:
-        bg_im.image = img
-
+    
     if(params['output_types']['vblur']):
     # create node for computing vector blur (approximate motion blur)
         vblur = tree.nodes.new('CompositorNodeVecBlur')
@@ -95,14 +349,13 @@ def create_composite_nodes(tree, params, img=None, idx=0):
         vblur_out.base_path = res_paths['vblur']
         vblur_out.location = 460, 460
 
-    # create node for mixing foreground and background images 
-    mix = tree.nodes.new('CompositorNodeMixRGB')
-    mix.location = 40, 30
-    mix.use_alpha = True
-
     # create node for the final output 
     composite_out = tree.nodes.new('CompositorNodeComposite')
     composite_out.location = 240, 30
+    
+    #despeckle node
+    despeckle = tree.nodes.new('CompositorNodeDespeckle')
+    despeckle.threshold = 0.3
 
     # create node for saving depth
     if(params['output_types']['depth']):
@@ -139,36 +392,36 @@ def create_composite_nodes(tree, params, img=None, idx=0):
         segm_out.format.file_format = 'OPEN_EXR'
         segm_out.base_path = res_paths['segm']
     
-    # merge fg and bg images
-    tree.links.new(bg_im.outputs[0], mix.inputs[1])
-    tree.links.new(layers.outputs['Image'], mix.inputs[2])
-    
+        
+        
     if(params['output_types']['vblur']):
-        tree.links.new(mix.outputs[0], vblur.inputs[0])                # apply vector blur on the bg+fg image,
-        tree.links.new(layers.outputs['Z'], vblur.inputs[1])           #   using depth,
-        tree.links.new(layers.outputs['Speed'], vblur.inputs[2])       #   and flow.
+        tree.links.new(layers.outputs['Image'], vblur.inputs[0])                # apply vector blur on the fg image,
+        tree.links.new(layers.outputs['Depth'], vblur.inputs[1])           #   using depth, #replace ['Depth'] with ['Z'] for blender <2.79
+        tree.links.new(layers.outputs['Vector'], vblur.inputs[2])       #   and flow. #replace ['Vector'] with ['Speed'] for blender <2.79
         tree.links.new(vblur.outputs[0], vblur_out.inputs[0])          # save vblurred output
+         
+    tree.links.new(layers.outputs[0], despeckle.inputs[1])    # save fg + bg
+    tree.links.new(despeckle.outputs[0],composite_out.inputs[0])
     
-    tree.links.new(mix.outputs[0], composite_out.inputs[0])            # bg+fg image
     if(params['output_types']['fg']):
         tree.links.new(layers.outputs['Image'], fg_out.inputs[0])      # save fg
     if(params['output_types']['depth']):    
-        tree.links.new(layers.outputs['Z'], depth_out.inputs[0])       # save depth
+        tree.links.new(layers.outputs['Depth'], depth_out.inputs[0])       # save depth #replace ['Depth'] with ['Z'] for blender <2.79
     if(params['output_types']['normal']):
         tree.links.new(layers.outputs['Normal'], normal_out.inputs[0]) # save normal
     if(params['output_types']['gtflow']):
-        tree.links.new(layers.outputs['Speed'], gtflow_out.inputs[0])  # save ground truth flow
+        tree.links.new(layers.outputs['Vector'], gtflow_out.inputs[0])  # save ground truth flow #replace ['Vector'] with ['Speed'] for blender <2.79
     if(params['output_types']['segm']):
         tree.links.new(layers.outputs['IndexMA'], segm_out.inputs[0])  # save segmentation
 
     return(res_paths)
 
 # creation of the spherical harmonics material, using an OSL script
-def create_sh_material(tree, sh_path, img=None):
-    # clear default nodes
+def create_sh_material(tree, sh_path, img=None):    
+
     for n in tree.nodes:
         tree.nodes.remove(n)
-
+        
     uv = tree.nodes.new('ShaderNodeTexCoord')
     uv.location = -800, 400
 
@@ -176,7 +429,10 @@ def create_sh_material(tree, sh_path, img=None):
     uv_xform.location = -600, 400
     uv_xform.inputs[1].default_value = (0, 0, 1)
     uv_xform.operation = 'AVERAGE'
-
+    
+    bsdf = tree.nodes.new("ShaderNodeBsdfDiffuse")
+    mat_out = tree.nodes.new("ShaderNodeOutputMaterial")
+    
     uv_im = tree.nodes.new('ShaderNodeTexImage')
     uv_im.location = -400, 400
     if img is not None:
@@ -184,24 +440,10 @@ def create_sh_material(tree, sh_path, img=None):
 
     rgb = tree.nodes.new('ShaderNodeRGB')
     rgb.location = -400, 200
-
-    script = tree.nodes.new('ShaderNodeScript')
-    script.location = -230, 400
-    script.mode = 'EXTERNAL'
-    script.filepath = sh_path #'spher_harm/sh.osl' #using the same file from multiple jobs causes white texture
-    script.update()
-
-    # the emission node makes it independent of the scene lighting
-    emission = tree.nodes.new('ShaderNodeEmission')
-    emission.location = -60, 400
-
-    mat_out = tree.nodes.new('ShaderNodeOutputMaterial')
-    mat_out.location = 110, 400
     
-    tree.links.new(uv.outputs[2], uv_im.inputs[0])
-    tree.links.new(uv_im.outputs[0], script.inputs[0])
-    tree.links.new(script.outputs[0], emission.inputs[0])
-    tree.links.new(emission.outputs[0], mat_out.inputs[0])
+    tree.links.new(uv.outputs[2], uv_im.inputs[0])    
+    tree.links.new(uv_im.outputs[0],bsdf.inputs[0])
+    tree.links.new(bsdf.outputs[0], mat_out.inputs[0])
 
 # computes rotation matrix through Rodrigues formula as in cv2.Rodrigues
 def Rodrigues(rotvec):
@@ -214,6 +456,12 @@ def Rodrigues(rotvec):
     return(cost*np.eye(3) + (1-cost)*r.dot(r.T) + np.sin(theta)*mat)
 
 def init_scene(scene, params, gender='female'):
+    
+    # TODO : IMPORT A RANDOMLY CHOSEN 3D SCENE
+    bpy.ops.object.select_all(action='DESELECT')  
+    room_type = choice(['bedroom','living'])
+    light_pos,light_size,light_intensity = build_background(room_type, [], width=20, length=15, height=2.4)
+    
     # load fbx model
     bpy.ops.import_scene.fbx(filepath=join(params['smpl_data_folder'], 'basicModel_%s_lbs_10_207_0_v1.0.2.fbx' % gender[0]),
                              axis_forward='Y', axis_up='Z', global_scale=100)
@@ -228,7 +476,8 @@ def init_scene(scene, params, gender='female'):
     bpy.ops.object.select_all(action='DESELECT')
     bpy.data.objects['Cube'].select = True
     bpy.ops.object.delete(use_global=False)
-
+    
+    
     # set camera properties and initial position
     bpy.ops.object.select_all(action='DESELECT')
     cam_ob = bpy.data.objects['Camera']
@@ -236,7 +485,7 @@ def init_scene(scene, params, gender='female'):
     scn.objects.active = cam_ob
 
     cam_ob.matrix_world = Matrix(((0., 0., 1, params['camera_distance']),
-                                 (0., -1, 0., -1.0),
+                                 (0., -1, 0., -1.0),                                 
                                  (-1., 0., 0., 0.),
                                  (0.0, 0.0, 0.0, 1.0)))
     cam_ob.data.angle = math.radians(40)
@@ -264,7 +513,7 @@ def init_scene(scene, params, gender='female'):
     arm_ob = bpy.data.objects['Armature']
     arm_ob.animation_data_clear()
 
-    return(ob, obname, arm_ob, cam_ob)
+    return(ob, obname, arm_ob, cam_ob, light_pos, light_size, light_intensity)
 
 # transformation between pose and blendshapes
 def rodrigues2bshapes(pose):
@@ -445,7 +694,6 @@ def main():
     
     smpl_data_folder = params['smpl_data_folder']
     smpl_data_filename = params['smpl_data_filename']
-    bg_path = params['bg_path']
     resy = params['resy']
     resx = params['resx']
     clothing_option = params['clothing_option'] # grey, nongrey or all
@@ -513,18 +761,11 @@ def main():
     gender = choice(genders)
 
     scene = bpy.data.scenes['Scene']
-    scene.render.engine = 'CYCLES'
+    scene.render.engine = 'CYCLES'    
+
     bpy.data.materials['Material'].use_nodes = True
-    scene.cycles.shading_system = True
     scene.use_nodes = True
-
-    log_message("Listing background images")
-    bg_names = join(bg_path, '%s_img.txt' % idx_info['use_split'])
-    nh_txt_paths = []
-    with open(bg_names) as f:
-        for line in f:
-            nh_txt_paths.append(join(bg_path, line))
-
+  
     # grab clothing names
     log_message("clothing: %s" % clothing_option)
     with open( join(smpl_data_folder, 'textures', '%s_%s.txt' % ( gender, idx_info['use_split'] ) ) ) as f:
@@ -540,18 +781,14 @@ def main():
     cloth_img_name = choice(txt_paths)
     cloth_img_name = join(smpl_data_folder, cloth_img_name)
     cloth_img = bpy.data.images.load(cloth_img_name)
-
-    # random background
-    bg_img_name = choice(nh_txt_paths)[:-1]
-    bg_img = bpy.data.images.load(bg_img_name)
-
+    
     log_message("Loading parts segmentation")
     beta_stds = np.load(join(smpl_data_folder, ('%s_beta_stds.npy' % gender)))
     
     log_message("Building materials tree")
     mat_tree = bpy.data.materials['Material'].node_tree
     create_sh_material(mat_tree, sh_dst, cloth_img)
-    res_paths = create_composite_nodes(scene.node_tree, params, img=bg_img, idx=idx)
+    res_paths = create_composite_nodes(scene.node_tree, params, idx=idx)
 
     log_message("Loading smpl data")
     smpl_data = np.load(join(smpl_data_folder, smpl_data_filename))
@@ -559,7 +796,7 @@ def main():
     log_message("Initializing scene")
     camera_distance = np.random.normal(8.0, 1)
     params['camera_distance'] = camera_distance
-    ob, obname, arm_ob, cam_ob = init_scene(scene, params, gender)
+    ob, obname, arm_ob, cam_ob, light_pos, light_size, light_intensity = init_scene(scene, params, gender)    
 
     setState0()
     ob.select = True
@@ -620,14 +857,7 @@ def main():
     # create output directory
     if not exists(output_path):
         mkdir_safe(output_path)
-
-    # spherical harmonics material needs a script to be loaded and compiled
-    scs = []
-    for mname, material in materials.items():
-        scs.append(material.node_tree.nodes['Script'])
-        scs[-1].filepath = sh_dst
-        scs[-1].update()
-
+   
     rgb_dirname = name.replace(" ", "") + '_c%04d.mp4' % (ishape + 1)
     rgb_path = join(tmp_path, rgb_dirname)
 
@@ -656,7 +886,7 @@ def main():
     dict_info['gender'] = np.empty(N, dtype='uint8') # 0 for male, 1 for female
     dict_info['joints2D'] = np.empty((2, 24, N), dtype='float32') # 2D joint positions in pixel space
     dict_info['joints3D'] = np.empty((3, 24, N), dtype='float32') # 3D joint positions in world coordinates
-    dict_info['light'] = np.empty((9, N), dtype='float32')
+    dict_info['light'] = np.empty((5, N), dtype='float32')
     dict_info['pose'] = np.empty((data['poses'][0].size, N), dtype='float32') # joint angles from SMPL (CMU)
     dict_info['sequence'] = name.replace(" ", "") + "_c%04d" % (ishape + 1)
     dict_info['shape'] = np.empty((ndofs, N), dtype='float32')
@@ -712,30 +942,40 @@ def main():
             cam_ob.keyframe_insert('location', frame=get_real_frame(seq_frame))
             dict_info['camLoc'] = np.array(cam_ob.location)
 
-    scene.node_tree.nodes['Image'].image = bg_img
-
     for part, material in materials.items():
-        material.node_tree.nodes['Vector Math'].inputs[1].default_value[:2] = (0, 0)
-
-    # random light
-    sh_coeffs = .7 * (2 * np.random.rand(9) - 1)
-    sh_coeffs[0] = .5 + .9 * np.random.rand() # Ambient light (first coeff) needs a minimum  is ambient. Rest is uniformly distributed, higher means brighter.
-    sh_coeffs[1] = -.7 * np.random.rand()
-
-    for ish, coeff in enumerate(sh_coeffs):
-        for sc in scs:
-            sc.inputs[ish+1].default_value = coeff
-
+        material.node_tree.nodes['Vector Math'].inputs[1].default_value[:2] = (0, 0)    
+    
+    #set GPU    
+    sysp = bpy.context.user_preferences.system
+#    devt = sysp.compute_device_type = 'CUDA'
+#    dev = sysp.compute_device = 'CUDA_0'
+    scene.cycles.device = 'GPU'   
+    bpy.context.scene.render.layers[0].cycles.use_denoising = True # only for blender 2.79
+#    scene.cycles.samples = 200 
+    bpy.ops.object.select_all(action='DESELECT') 
+    
+#    scene.cycles.sample_clamp_direct = 6.0
+#    scene.cycles.sample_clamp_indirect = 3.0
+    
+    for obj in bpy.data.objects:
+        obj.cycles_visibility.diffuse = True
+        obj.cycles_visibility.glossy = True        
+        
+    
     # iterate over the keyframes and render
     # LOOP TO RENDER
     for seq_frame, (pose, trans) in enumerate(zip(data['poses'][fbegin:fend:stepsize], data['trans'][fbegin:fend:stepsize])):
         scene.frame_set(get_real_frame(seq_frame))
         iframe = seq_frame
 
-        dict_info['bg'][iframe] = bg_img_name
+        dict_info['bg'][iframe] = 'auto_bg'
         dict_info['cloth'][iframe] = cloth_img_name
-        dict_info['light'][:, iframe] = sh_coeffs
+        li = [light_pos, light_size, light_intensity]
+        dict_info['light'][:, iframe] = [i for sub in li for i in sub]
 
+        	
+        
+        
         scene.render.use_antialiasing = False
         scene.render.filepath = join(rgb_path, 'Image%04d.png' % get_real_frame(seq_frame))
 
