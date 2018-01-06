@@ -12,7 +12,7 @@ fout = open("job_list.txt", "w")
 all_idx_info = pickle.load(open("../pkl/idx_info.pickle", 'rb'))
 nb_idx = len(all_idx_info)
 
-new_idx_info = [all_idx_info[i] for i in xrange(len(all_idx_info)) if not list[i]['name'].startswith('un') and not list[i]['name'].startswith('h36m')]
+new_idx_info = [all_idx_info[i] for i in xrange(len(all_idx_info)) if not all_idx_info[i]['name'].startswith('un') and not all_idx_info[i]['name'].startswith('h36m')]
 
 
 for it_runpass, stride in enumerate(run_stride):
