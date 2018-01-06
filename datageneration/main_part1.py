@@ -26,14 +26,18 @@ def build_background(room='bedroom', walls=['N','W'], width=25, length=15, heigh
     
     #Build walls and floor
     bpy.ops.mesh.archimesh_room()
-    height_2 = height + 5
+    height_2 = height + 3
     bpy.data.objects["Room"].RoomGenerator[0].wall_num = 3    
     bpy.data.objects["Room"].RoomGenerator[0].wall_width = 0.09    
     bpy.data.objects["Room"].RoomGenerator[0].walls[0].w = width
     bpy.data.objects["Room"].RoomGenerator[0].walls[1].w = length
-    bpy.data.objects["Room"].RoomGenerator[0].walls[2].w = -width         
+    bpy.data.objects["Room"].RoomGenerator[0].walls[2].w = -width             
     bpy.data.objects["Room"].RoomGenerator[0].merge = True
+    bpy.data.objects["Room"].RoomGenerator[0].walls[0].h = '3'
+    bpy.data.objects["Room"].RoomGenerator[0].walls[1].h = '3'
+    bpy.data.objects["Room"].RoomGenerator[0].walls[2].h = '3'
     bpy.data.objects["Room"].RoomGenerator[0].room_height = height_2
+    
 #    bpy.data.objects["Room"].RoomGenerator[0].floor = True 
 #    bpy.data.objects["Room"].RoomGenerator[0].ceiling = True 
     bpy.data.objects["Room"].location = (-width/2,-length/2,0)
@@ -45,35 +49,35 @@ def build_background(room='bedroom', walls=['N','W'], width=25, length=15, heigh
     if room=='bedroom':        
         # load bed
 #        load_IKEA_dtd('bed',(2,2,0.0),1,0)
-        load_IKEA_dtd('bed',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        load_IKEA_dtd('bed',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),1,np.random.uniform(-180,179))
         # load bookcase
 #        load_IKEA_dtd('bookcase',(2.0,3.0,0.0),1,0)
-        load_IKEA_dtd('bookcase',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        load_IKEA_dtd('bookcase',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),1,np.random.uniform(-180,179))
         # load desk
 #        load_IKEA_dtd('desk',(2.0,-2.0,0.0),1,0)
-        load_IKEA_dtd('desk',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        load_IKEA_dtd('desk',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),1,np.random.uniform(-180,179))
         # load chair 
 #        load_IKEA_dtd('chair',(0.0,2.0,0.0),0.7,np.random.uniform(-180,179))
-        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
+        load_IKEA_dtd('chair',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),0.7,np.random.uniform(-180,179))
         # load wardrobe
 #        load_IKEA_dtd('wardrobe',(4.0,2.0,0.0),1,0)
-        load_IKEA_dtd('wardrobe',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        load_IKEA_dtd('wardrobe',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),1,np.random.uniform(-180,179))
         
     if room=='living':
         # load sofa
 #        load_IKEA_dtd('sofa',(2,2,0.0),1,0)
-        load_IKEA_dtd('sofa',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        load_IKEA_dtd('sofa',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),1,np.random.uniform(-180,179))
         # load bookcase
 #        load_IKEA_dtd('bookcase',(2.0,3.0,0.0),1,0)
-        load_IKEA_dtd('bookcase',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        load_IKEA_dtd('bookcase',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),1,np.random.uniform(-180,179))
         # load desk
 #        load_IKEA_dtd('desk',(2.0,-2.0,0.0),1,0)
-        load_IKEA_dtd('desk',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),1,np.random.uniform(-180,179))
+        load_IKEA_dtd('desk',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),1,np.random.uniform(-180,179))
         # load chair 
-        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
-        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
-        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
-        load_IKEA_dtd('chair',(np.random.uniform(-5.0,5.0),np.random.uniform(-5.0,5.0),0.0),0.7,np.random.uniform(-180,179))
+        load_IKEA_dtd('chair',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),0.7,np.random.uniform(-180,179))
+        load_IKEA_dtd('chair',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),0.7,np.random.uniform(-180,179))
+        load_IKEA_dtd('chair',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),0.7,np.random.uniform(-180,179))
+        load_IKEA_dtd('chair',(np.random.uniform(-4.0,4.0),np.random.uniform(-4.0,4.0),0.0),0.7,np.random.uniform(-180,179))
         # load table
         load_IKEA_dtd('table',(4.0,2.0,0.0),1.6,0)
         
@@ -108,7 +112,8 @@ def build_background(room='bedroom', walls=['N','W'], width=25, length=15, heigh
     
     light_tree.links.new(emission.outputs[0],light_out.inputs[0])    
     
-    light_pos = ((np.random.rand(1)-0.5)*width,(np.random.rand(1)-0.5)*length,(np.random.rand(1)-0.5)*height)
+    light_pos = ((np.random.rand(1)-0.5)*width*0.7,(np.random.rand(1)-0.5)*length*0.7,(np.random.rand(1)-0.5)*height)
+
 #    light_angle = (np.random.rand(1)*360-180,np.random.rand(1)*360-180,np.random.rand(1)*360-180)
     light_size = np.random.rand(1)
     light_sphere.location = light_pos
@@ -951,16 +956,29 @@ def main():
 #    dev = sysp.compute_device = 'CUDA_0'
     scene.cycles.device = 'GPU'   
     bpy.context.scene.render.layers[0].cycles.use_denoising = True # only for blender 2.79
-#    scene.cycles.samples = 200 
+    scene.cycles.samples = 128 
     bpy.ops.object.select_all(action='DESELECT') 
     
 #    scene.cycles.sample_clamp_direct = 6.0
 #    scene.cycles.sample_clamp_indirect = 3.0
     
+    
     for obj in bpy.data.objects:
-        obj.cycles_visibility.diffuse = True
-        obj.cycles_visibility.glossy = True        
+        if obj.name=='Sphere' or obj.name=='Armature'  or obj.name=='f_avg':
+            obj.cycles_visibility.diffuse = True #This divides the rendering time by two
+            obj.cycles_visibility.glossy = True        
+        else:
+            obj.cycles_visibility.diffuse = False
+            obj.cycles_visibility.glossy = True
+    
+#    for obj in bpy.data.objects:
+#        obj.cycles_visibility.diffuse = True #This divides the rendering time by two
+#        obj.cycles_visibility.glossy = True        
+#        if obj.name=='Room' or obj.name=='Floor':
+#            obj.cycles_visibility.diffuse = False
+#            obj.cycles_visibility.glossy = True
         
+    
     
     # iterate over the keyframes and render
     # LOOP TO RENDER
