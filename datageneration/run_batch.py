@@ -13,7 +13,7 @@ with open(join(os.path.expanduser('~'),'Documents','MVA','surreal','datagenerati
 nb_done = len(job_done)
 
 for i,job_params in enumerate(list_job):    
-    if i>nb_done-1 and i<nb_done + 20:
+    if i>nb_done-1 and i<nb_done + 109:
 	print('current job: %s' %job_params)
         cmd = subprocess.call(sdir +'/' +'run.sh' +' '+ '\''+job_params+'\'', shell=True)        
         with open(join(os.path.expanduser('~'),'Documents','MVA','surreal','datageneration','misc','job_done.txt'),'a') as f:

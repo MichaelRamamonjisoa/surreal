@@ -43,7 +43,7 @@ def build_background(room='bedroom', walls=['N','W'], width=25, length=15, heigh
     bpy.data.objects["Room"].location = (-width/2,-length/2,0)
     
     
-    the_folder = join(os.path.expanduser('~'), 'Documents', 'MVA', 'datageneration')
+    the_folder = os.getcwd()
     tex_folder = join(the_folder,'Texture_Material','dtd')
                                                   
     if room=='bedroom':        
@@ -217,7 +217,7 @@ def load_IKEA_dtd(item_category='bed', item_location=(0,0,0), item_scale = 1, it
     
     #build collection list
     list_obj = []
-    the_folder = join(os.path.expanduser('~'), 'Documents', 'MVA', 'datageneration')
+    the_folder = os.getcwd()
     tex_folder = join(the_folder,'Texture_Material','dtd')
     
     IKEA_folder = join(the_folder,'3dobj_data', 'IKEA')
