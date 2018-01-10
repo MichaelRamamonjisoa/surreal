@@ -1,0 +1,14 @@
+banded
+blotchy
+braided
+knitted
+lacelike
+lined
+marbled
+paisley
+polka-dotted
+scaly
+stratified
+striped
+woven
+zigzagged
